@@ -3,6 +3,10 @@
 class Neutrino_Http_Request
 {
     /**
+     * @var Neutrino_Http_Request
+     */
+    protected static $_instance;
+    /**
      * @var Neutrino
      */
     protected $_app;
@@ -20,9 +24,21 @@ class Neutrino_Http_Request
     /**
      * @param Neutrino $app
      */
-    public function __construct(Neutrino $app)
+    public function __construct($uri = null)
     {
-        $this->_app = $app;
+        $this->_uri = $uri;
+    }
+
+    /**
+     * @static
+     * @return Neutrino_Http_Request
+     */
+    public static function getInstance()
+    {
+        if (!self::$_instance) {
+            self::$_instance = new self();
+        }
+        return self::$_instance;
     }
 
     /**
@@ -31,8 +47,7 @@ class Neutrino_Http_Request
     public function getUri()
     {
         if (null === $this->_uri) {
-            $pattern = '/^' . preg_quote($this->_app->baseUri, '/') . '/';
-            $this->_uri = preg_replace($pattern, '', $this->getServer('REQUEST_URI'));
+            $this->_uri = $this->getServer('REQUEST_URI');
         }
 
         return $this->_uri;
@@ -57,8 +72,8 @@ class Neutrino_Http_Request
         if (null === $this->_headers) {
             $this->_headers = [];
             foreach ($_SERVER as $key => $value) {
-                if ('HTTP' == ($name = substr($key, 0, 4))) {
-                    $this->_headers[$name] = $value;
+                if ('HTTP' == substr($key, 0, 4)) {
+                    $this->_headers[substr($key, 5)] = $value;
                 }
             }
 
@@ -91,7 +106,7 @@ class Neutrino_Http_Request
      */
     public function getMethod()
     {
-        return strtoupper($this->getServer('HTTP_REQUEST_METHOD'));
+        return strtoupper($this->getServer('REQUEST_METHOD'));
     }
 
     /**
@@ -127,11 +142,19 @@ class Neutrino_Http_Request
     }
 
     /**
-     * @return mixed
+     * @return bool
      */
-    public function isOption()
+    public function isOptions()
     {
-        return 'OPTION' == $this->getMethod();
+        return 'OPTIONS' == $this->getMethod();
+    }
+
+    /**
+     * @return bool
+     */
+    public function isHead()
+    {
+        return 'HEAD' == $this->getMethod();
     }
 
     /**
@@ -139,7 +162,7 @@ class Neutrino_Http_Request
      */
     public function isXhr()
     {
-        return $this->getServer('X_REQUESTED_WITH') == XMLHttpRequest;
+        return $this->getServer('X_REQUESTED_WITH') == 'XMLHttpRequest';
     }
 
     /**
@@ -180,5 +203,28 @@ class Neutrino_Http_Request
     public function getParam($name, $default = null)
     {
         return isset($_REQUEST[$name])? $_REQUEST[$name] : $default;
+    }
+
+    /**
+     * @return array
+     */
+    public function getAllParams()
+    {
+        return array_merge($_GET, $_POST, $_COOKIE, $_REQUEST);
+    }
+
+    public function getSomeParams($names)
+    {
+        $result = [];
+
+        if (func_num_args() > 1) {
+            $names = func_get_args();
+        }
+
+        foreach ($names as $name) {
+            $result[$name] = $this->getParam($name);
+        }
+
+        return $result;
     }
 }

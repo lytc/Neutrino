@@ -8,7 +8,7 @@ class Neutrino_Router
     /**
      * @var bool
      */
-    public $allowDuplicate = false;
+    protected  $_allowDuplicate = false;
 
     protected $_defaultRouteClass = 'Neutrino_Route_Named';
 
@@ -25,9 +25,18 @@ class Neutrino_Router
     /**
      * @param Neutrino $app
      */
-    public function __construct(Neutrino $app)
+    public function __construct(Neutrino_App $app, $allowDuplicate = false)
     {
         $this->_app = $app;
+        $this->_allowDuplicate = $allowDuplicate;
+    }
+
+    /**
+     * @return Neutrino
+     */
+    public function getApp()
+    {
+        return $this->_app;
     }
 
     /**
@@ -37,12 +46,28 @@ class Neutrino_Router
      */
     public function setDefaultRouteClass($className)
     {
-        if (is_subclass_of($className, 'Neutrino_Route_Abstract')) {
+        if (!is_subclass_of($className, 'Neutrino_Route_Abstract')) {
             throw new Neutrino_Router_Exception('Default route class must be an instance of Neutrino_Route_Abstract');
         }
 
         $this->_defaultRouteClass = $className;
         return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getDefaultRouteClass()
+    {
+        return $this->_defaultRouteClass;
+    }
+
+    /**
+     * @return array
+     */
+    public function getRoutes()
+    {
+        return $this->_routes;
     }
 
     /**
@@ -52,11 +77,13 @@ class Neutrino_Router
      */
     public function add(Neutrino_Route_Abstract $route)
     {
-        if (!$this->allowDuplicate) {
+        if (!$this->_allowDuplicate) {
+            $pattern = $route->getPattern();
+            $method = $route->getMethod();
+
             foreach ($this->_routes as $item) {
-                if ($item->isIntersectWith($route)) {
-                    $pattern = $route->getPattern();
-                    throw new Neutrino_Router_Exception("Duplicate route with pattern {$pattern}");
+                if ($pattern == $item->getPattern() && $method = $item->getMethod()) {
+                    throw new Neutrino_Router_Exception("Duplicate route with pattern '{$pattern}'");
                 }
             }
         }
@@ -74,9 +101,9 @@ class Neutrino_Router
     public function map($pattern, $callable, $methods = Neutrino::METHOD_GET)
     {
         if ('#' == $pattern[0]) {
-            $route = new Neutrino_Route_Regex(substr($pattern, 1), $callable);
+            $route = new Neutrino_Route_Regex(substr($pattern, 1), $callable, $methods);
         } else {
-            $route = new Neutrino_Route_Named($pattern, $callable);
+            $route = new Neutrino_Route_Named($pattern, $callable, $methods);
         }
 
         return $this->add($route);
@@ -123,13 +150,17 @@ class Neutrino_Router
         return $this->map($pattern, $callable, Neutrino::METHOD_DELETE);
     }
 
+    /**
+     * @return bool
+     */
     public function dispatch()
     {
-        $uri = $this->_app->getRequest()->getUri();
+        $request = $this->_app->getRequest();
+        $uri = substr($request->getUri(), strlen($this->_app->getBaseUri()));
         $hasMatch = false;
 
         foreach ($this->_routes as $route) {
-            if (is_array($params = $route->match($uri))) {
+            if ($request->getMethod() == $route->getMethod() && is_array($params = $route->match($uri))) {
                 call_user_func_array(Closure::bind($route->getCallable(), $this->_app), $params);
                 $hasMatch = true;
                 break;

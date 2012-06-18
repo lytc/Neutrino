@@ -4,7 +4,7 @@ class Neutrino_Route_Named extends Neutrino_Route_Abstract
 {
     public function match($uri) {
         $pattern = preg_quote($this->_pattern, '#');
-        $pattern = preg_replace('/\\\:([\w_\-]+)/', '(?<$1>[\w_\-]+)', $pattern);
+        $pattern = preg_replace('/\\\:([^\/]+)/', '(?<$1>[^\/]+)', $pattern);
         $pattern = "#^$pattern$#";
 
         if (preg_match($pattern, $uri, $matches)) {

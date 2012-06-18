@@ -13,32 +13,41 @@ abstract class Neutrino_Route_Abstract
     protected $_callable;
 
     /**
-     * @var array|string
+     * @var string
      */
-    protected $_methods;
+    protected $_method;
 
     /**
      * @abstract
-     * @param string $url
+     * @param string $uri
      * @return boolean
      */
-    abstract public function match($url);
+    abstract public function match($uri);
 
     /**
      * @param string $pattern
      * @param callable $callable
      * @param string $methods
      */
-    public function __construct($pattern, $callable, $methods = Neutrino::METHOD_GET)
+    public function __construct($pattern, $callable, $method = Neutrino::METHOD_GET)
     {
         $this->_pattern = $pattern;
         $this->_callable = $callable;
 
-        if (is_string($methods)) {
-            $methods = [$methods];
+        $method = strtoupper($method);
+        $supportMethods = array(
+            Neutrino::METHOD_GET,
+            Neutrino::METHOD_POST,
+            Neutrino::METHOD_PUT,
+            Neutrino::METHOD_DELETE,
+            Neutrino::METHOD_OPTIONS,
+            Neutrino::METHOD_HEAD
+        );
+        if (!in_array($method, $supportMethods)) {
+            throw new Neutrino_Route_Exception(
+                "The request method must be GET, POST, PUT, DELETE, OPTIONS or HEAD. '$method' given.");
         }
-
-        $this->_methods = $methods;
+        $this->_method = $method;
     }
 
     /**
@@ -63,24 +72,11 @@ abstract class Neutrino_Route_Abstract
     }
 
     /**
-     * @param string|array $methods
-     * @return Neutrino_Route_Abstract
-     */
-    public function setMethods($methods)
-    {
-        if (!is_array($methods)) {
-            $methods = [$methods];
-        }
-        $this->_methods = $methods;
-        return $this;
-    }
-
-    /**
      * @return array|string
      */
-    public function getMethods()
+    public function getMethod()
     {
-        return $this->_methods;
+        return $this->_method;
     }
 
     /**
@@ -89,29 +85,6 @@ abstract class Neutrino_Route_Abstract
     public function getCallable()
     {
         return $this->_callable;
-    }
-
-    /**
-     * @param string|Neutrino_Route_Abstract $pattern
-     * @param string|array $methods optional
-     * @return bool
-     */
-    public function isIntersectWith($pattern, $methods = Neutrino::METHOD_GET)
-    {
-        if ($pattern instanceof Neutrino_Route_Abstract) {
-            $methods = $pattern->getMethods();
-            $pattern = $pattern->getPattern();
-        }
-
-        if (is_string($methods)) {
-            $methods = [$methods];
-        }
-
-        if ($pattern === $this->_pattern && array_intersect($this->_methods, $methods)) {
-            return true;
-        }
-
-        return false;
     }
 
     /**

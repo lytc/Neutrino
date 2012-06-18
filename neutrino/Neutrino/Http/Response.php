@@ -35,7 +35,7 @@ class Neutrino_Http_Response
     /**
      * @param Neutrino $app
      */
-    public function __construct(Neutrino $app)
+    public function __construct(Neutrino_App $app)
     {
         $this->_app = $app;
     }
@@ -44,9 +44,9 @@ class Neutrino_Http_Response
      * @param string $name
      * @param string $value
      */
-    public function setHeader($name, $value = null)
+    public function setHeader($name, $value = null, $replace = true, $code = null)
     {
-        $this->_headers[$name] = $value;
+        $this->_headers[] = ['name' => $name, 'value' => $value, 'replace' => $replace, 'code' => $code];
     }
 
     /**
@@ -56,9 +56,25 @@ class Neutrino_Http_Response
     public function setHeaders(array $headers)
     {
         foreach ($headers as $name => $value) {
-            $this->setHeader($name, $value);
+            if (is_array($value)) {
+                $header = ['name' => $name];
+                $header['value'] = $value[0];
+                $header['replace'] = isset($value[1])? $value[1] : true;
+                $header['code'] = is_numeric($value[2])? $value[2] : null;
+            } else {
+                $header = ['name' => $name, 'value' => $value];
+            }
+            call_user_func_array(array($this, 'setHeader'), $header);
         }
         return $this;
+    }
+
+    /**
+     * @return array
+     */
+    public function getHeaders()
+    {
+        return $this->_headers;
     }
 
     /**
@@ -72,6 +88,14 @@ class Neutrino_Http_Response
     }
 
     /**
+     * @return int
+     */
+    public function getCode()
+    {
+        return $this->_code;
+    }
+
+    /**
      * @param $message
      * @return Neutrino_Http_Response
      */
@@ -79,6 +103,14 @@ class Neutrino_Http_Response
     {
         $this->_message = $message;
         return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getMessage()
+    {
+        return $this->_message;
     }
 
     /**
@@ -91,11 +123,34 @@ class Neutrino_Http_Response
     }
 
     /**
+     * @param $url
+     * @param int $code
+     * @return Neutrino_Http_Response
+     * @throws Neutrino_Http_Response_Exception
+     */
+    public function redirect($url, $code = 302)
+    {
+        if ($code < 300 || $code > 307) {
+            throw new Neutrino_Http_Response_Exception('Redirect code must be >= 300 and <= 307');
+        }
+
+        return $this->setHeader('Location', $url, true, $code);
+    }
+
+    /**
      * @param $content
      */
     public function setBody($content)
     {
         $this->_body = $content;
+    }
+
+    /**
+     * @return string
+     */
+    public function getBody()
+    {
+        return $this->_body;
     }
 
     /**
@@ -106,13 +161,16 @@ class Neutrino_Http_Response
         if (false === headers_sent()) {
             $codeSent = false;
 
-            foreach ($this->_headers as $name => $value) {
-                $header = null === $value? $name : "$name: $value";
-                if (!$codeSent) {
-                    header($header, true, $this->_code);
+            foreach ($this->_headers as $header) {
+                if ($header['value']) {
+                    $header['name'] .= ": {$header['value']}";
+                }
+
+                if ($header['code']) {
+                    header($header['name'], $header['replace'], $header['code']);
                     $codeSent = true;
                 } else {
-                    header($header);
+                    header($header['name'], $header['replace']);
                 }
             }
 
