@@ -1,4 +1,10 @@
 <?php
+namespace neutrino;
+
+use \Closure,
+    neutrino\http\Request,
+    neutrino\DynamicMethod;
+
 
 require_once dirname(__FILE__) . '/Neutrino/Exception.php';
 
@@ -13,7 +19,7 @@ class Neutrino
 
     /**
      * @static
-     * @throws Neutrino_Exception
+     * @throws \neutrino\Exception
      */
     public static function registerAutoLoad()
     {
@@ -22,8 +28,9 @@ class Neutrino
                 return true;
             }
 
-            $filePath = dirname(__FILE__) . '/' . str_replace('_', '/', $className) . '.php';
+            $filePath = dirname(__FILE__) . '/' . str_replace('\\', '/', $className) . '.php';
             $resolvedName = stream_resolve_include_path($filePath);
+
             if (false !== $resolvedName) {
                 return include $resolvedName;
             }
@@ -38,11 +45,11 @@ class Neutrino
      */
     public static function map($baseUri, $callable)
     {
-        $request = Neutrino_Http_Request::getInstance();
+        $request = Request::getInstance();
         $uri = $request->getUri();
 
         if (substr($uri, 0, strlen($baseUri)) == $baseUri) {
-            $class = new Neutrino_DynamicMethod();
+            $class = new DynamicMethod();
 
             $class->run = function($appName) use ($baseUri) {
                 $app = new $appName($baseUri);
@@ -50,7 +57,7 @@ class Neutrino
                 return $app;
             };
 
-            $app = call_user_func(Closure::bind($callable, $class));
+            $app = call_user_func(\Closure::bind($callable, $class));
             return $app;
         }
     }

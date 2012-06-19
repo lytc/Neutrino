@@ -1,6 +1,9 @@
 <?php
+namespace neutrino\route;
+use neutrino\Neutrino,
+    neutrino\route\Exception;
 
-abstract class Neutrino_Route_Abstract
+abstract class AbstractRoute
 {
     /**
      * @var string
@@ -44,7 +47,7 @@ abstract class Neutrino_Route_Abstract
             Neutrino::METHOD_HEAD
         );
         if (!in_array($method, $supportMethods)) {
-            throw new Neutrino_Route_Exception(
+            throw new Exception(
                 "The request method must be GET, POST, PUT, DELETE, OPTIONS or HEAD. '$method' given.");
         }
         $this->_method = $method;
@@ -55,7 +58,7 @@ abstract class Neutrino_Route_Abstract
      * @param string $pattern
      * @param callable $callable
      * @param string $method
-     * @return Neutrino_Route_Abstract
+     * @return AbstractRoute
      */
     public static function createInstance($pattern, $callable, $method = Neutrino::METHOD_GET)
     {
@@ -91,7 +94,7 @@ abstract class Neutrino_Route_Abstract
      * @static
      * @param $pattern
      * @param $callable
-     * @return Neutrino_Route_Abstract
+     * @return AbstractRoute
      */
     public static function get($pattern, $callable) {
         return self::createInstance($pattern, $callable);
@@ -101,7 +104,7 @@ abstract class Neutrino_Route_Abstract
      * @static
      * @param string $pattern
      * @param callable $callable
-     * @return Neutrino_Route_Abstract
+     * @return AbstractRoute
      */
     public static function post($pattern, $callable)
     {
@@ -112,7 +115,7 @@ abstract class Neutrino_Route_Abstract
      * @static
      * @param string $pattern
      * @param callable $callable
-     * @return Neutrino_Route_Abstract
+     * @return AbstractRoute
      */
     public static function put($pattern, $callable)
     {
@@ -123,7 +126,7 @@ abstract class Neutrino_Route_Abstract
      * @static
      * @param string $pattern
      * @param callable $callable
-     * @return Neutrino_Route_Abstract
+     * @return AbstractRoute
      */
     public static function delete($pattern, $callable)
     {

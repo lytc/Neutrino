@@ -1,17 +1,20 @@
 <?php
+use neutrino\App,
+    neutrino\http\Request;
+
 require_once dirname(__FILE__) . '/../../bootstrap.php';
 
-class Neutrino_Http_Request_Test extends PHPUnit_Framework_TestCase
+class Request_Test extends PHPUnit_Framework_TestCase
 {
     protected function _createRequest()
     {
-        $app = new Neutrino_App();
+        $app = new App();
         return $app->getRequest();
     }
 
     public function testGetUri()
     {
-        $request = new Neutrino_Http_Request();
+        $request = new Request();
 
         $uri = '/posts/view/1';
         $_SERVER['REQUEST_URI'] = $uri;
@@ -21,7 +24,7 @@ class Neutrino_Http_Request_Test extends PHPUnit_Framework_TestCase
 
     public function testGetServer()
     {
-        $request = new Neutrino_Http_Request();
+        $request = new Request();
         $_SERVER['TEST_ENV'] = 'test';
 
         $this->assertEquals('test', $request->getServer('TEST_ENV'));
@@ -29,14 +32,14 @@ class Neutrino_Http_Request_Test extends PHPUnit_Framework_TestCase
 
     public function testGetHeaders()
     {
-        $request = new Neutrino_Http_Request();
+        $request = new Request();
 
         $this->assertEquals('array', gettype($request->getHeaders()));
     }
 
     public function testGetHeader()
     {
-        $request = new Neutrino_Http_Request();
+        $request = new Request();
 
         $_SERVER['HTTP_TEST_HEADER'] = 'test';
 
@@ -46,7 +49,7 @@ class Neutrino_Http_Request_Test extends PHPUnit_Framework_TestCase
 
     public function testGetMethod()
     {
-        $request = new Neutrino_Http_Request();
+        $request = new Request();
 
         $_SERVER['REQUEST_METHOD'] = 'GET';
 
@@ -55,7 +58,7 @@ class Neutrino_Http_Request_Test extends PHPUnit_Framework_TestCase
 
     public function testIsGet()
     {
-        $request = new Neutrino_Http_Request();
+        $request = new Request();
 
         $_SERVER['REQUEST_METHOD'] = 'GET';
 
@@ -64,7 +67,7 @@ class Neutrino_Http_Request_Test extends PHPUnit_Framework_TestCase
 
     public function testIsPost()
     {
-        $request = new Neutrino_Http_Request();
+        $request = new Request();
 
         $_SERVER['REQUEST_METHOD'] = 'POST';
 
@@ -73,7 +76,7 @@ class Neutrino_Http_Request_Test extends PHPUnit_Framework_TestCase
 
     public function testIsPut()
     {
-        $request = new Neutrino_Http_Request();
+        $request = new Request();
 
         $_SERVER['REQUEST_METHOD'] = 'PUT';
 
@@ -82,7 +85,7 @@ class Neutrino_Http_Request_Test extends PHPUnit_Framework_TestCase
 
     public function testIsDelete()
     {
-        $request = new Neutrino_Http_Request();
+        $request = new Request();
 
         $_SERVER['REQUEST_METHOD'] = 'DELETE';
 
@@ -91,7 +94,7 @@ class Neutrino_Http_Request_Test extends PHPUnit_Framework_TestCase
 
     public function testIsOptions()
     {
-        $request = new Neutrino_Http_Request();
+        $request = new Request();
 
         $_SERVER['REQUEST_METHOD'] = 'OPTIONS';
 
@@ -100,7 +103,7 @@ class Neutrino_Http_Request_Test extends PHPUnit_Framework_TestCase
 
     public function testIsHead()
     {
-        $request = new Neutrino_Http_Request();
+        $request = new Request();
 
         $_SERVER['REQUEST_METHOD'] = 'HEAD';
 
@@ -109,7 +112,7 @@ class Neutrino_Http_Request_Test extends PHPUnit_Framework_TestCase
 
     public function testIsXhr()
     {
-        $request = new Neutrino_Http_Request();
+        $request = new Request();
 
         $_SERVER['X_REQUESTED_WITH'] = 'XMLHttpRequest';
 
@@ -118,7 +121,7 @@ class Neutrino_Http_Request_Test extends PHPUnit_Framework_TestCase
 
     public function testGetGetParam()
     {
-        $request = new Neutrino_Http_Request();
+        $request = new Request();
         $_GET['test'] = 'test';
 
         $this->assertEquals('test', $request->getGetParam('test'));
@@ -126,7 +129,7 @@ class Neutrino_Http_Request_Test extends PHPUnit_Framework_TestCase
 
     public function testGetPostParam()
     {
-        $request = new Neutrino_Http_Request();
+        $request = new Request();
         $_POST['test'] = 'test';
 
         $this->assertEquals('test', $request->getPostParam('test'));
@@ -134,7 +137,7 @@ class Neutrino_Http_Request_Test extends PHPUnit_Framework_TestCase
 
     public function testGetCookieParam()
     {
-        $request = new Neutrino_Http_Request();
+        $request = new Request();
         $_COOKIE['test'] = 'test';
 
         $this->assertEquals('test', $request->getCookieParam('test'));
@@ -142,7 +145,7 @@ class Neutrino_Http_Request_Test extends PHPUnit_Framework_TestCase
 
     public function testGetParam()
     {
-        $request = new Neutrino_Http_Request();
+        $request = new Request();
 
         $_REQUEST['test'] = 'test';
         $_REQUEST['test2'] = 'test2';
@@ -154,7 +157,7 @@ class Neutrino_Http_Request_Test extends PHPUnit_Framework_TestCase
 
     public function testGetAllParams()
     {
-        $request = new Neutrino_Http_Request();
+        $request = new Request();
 
         $this->assertEquals([], $request->getAllParams());
 
@@ -169,7 +172,7 @@ class Neutrino_Http_Request_Test extends PHPUnit_Framework_TestCase
 
     public function testGetSomeParams()
     {
-        $request = new Neutrino_Http_Request();
+        $request = new Request();
 
         $_REQUEST['test'] = 'test';
         $_REQUEST['test2'] = 'test2';

@@ -1,6 +1,8 @@
 <?php
+namespace neutrino\route;
+use neutrino\route;
 
-class Neutrino_Route_Named extends Neutrino_Route_Abstract
+class Named extends AbstractRoute
 {
     public function match($uri) {
         $pattern = preg_quote($this->_pattern, '#');

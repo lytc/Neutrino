@@ -1,8 +1,10 @@
 <?php
+use neutrino\Neutrino,
+    neutrino\route\AbstractRoute;
 
 require_once dirname(__FILE__) . '/../../bootstrap.php';
 
-class MyRoute extends Neutrino_Route_Abstract
+class MyRoute extends AbstractRoute
 {
     public function match($uri) {}
 }
@@ -16,7 +18,7 @@ class Neutrino_Route_Abstract_Test extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException Neutrino_Route_Exception
+     * @expectedException neutrino\route\Exception
      * @expectedExceptionMessage The request method must be GET, POST, PUT, DELETE, OPTIONS or HEAD. 'TRACE' given.
      */
     public function testWithUnExpectedRequestMethodShouldThrowException()

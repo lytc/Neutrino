@@ -1,4 +1,5 @@
 <?php
+use neutrino\App;
 
 require_once dirname(__FILE__) . '/../bootstrap.php';
 
@@ -6,22 +7,22 @@ class Neutrino_App_Test extends PHPUnit_Framework_TestCase
 {
     public function testGetRouter()
     {
-        $app = new Neutrino_App();
+        $app = new App();
         $router = $app->getRouter();
-        $this->assertInstanceOf('Neutrino_Router', $router);
+        $this->assertInstanceOf('neutrino\Router', $router);
     }
 
     public function testGetRequest()
     {
-        $app = new Neutrino_App();
+        $app = new App();
         $request = $app->getRequest();
-        $this->assertInstanceOf('Neutrino_Http_Request', $request);
+        $this->assertInstanceOf('neutrino\http\Request', $request);
     }
 
     public function testGetResponse()
     {
-        $app = new Neutrino_App();
+        $app = new App();
         $response = $app->getResponse();
-        $this->assertInstanceOf('Neutrino_Http_Response', $response);
+        $this->assertInstanceOf('neutrino\http\Response', $response);
     }
 }

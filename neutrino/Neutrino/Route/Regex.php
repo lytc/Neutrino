@@ -1,6 +1,8 @@
 <?php
+namespace neutrino\route;
+use neutrino\route;
 
-class Neutrino_Route_Regex extends Neutrino_Route_Abstract
+class Regex extends AbstractRoute
 {
     public function match($uri)
     {

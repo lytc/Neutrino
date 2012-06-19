@@ -1,67 +1,71 @@
 <?php
+use neutrino\Neutrino,
+    neutrino\App,
+    neutrino\Router,
+    neutrino\route\Named;
 
 require_once dirname(__FILE__) . '/../bootstrap.php';
 
-class Neutrino_Router_Test extends PHPUnit_Framework_TestCase
+class Router_Test extends PHPUnit_Framework_TestCase
 {
     protected function _createRouter($allowDuplicate = false)
     {
-        $app = new Neutrino_App();
-        $router = new Neutrino_Router($app, $allowDuplicate);
+        $app = new App();
+        $router = new Router($app, $allowDuplicate);
         return $router;
     }
 
     public function testConstROUTER_NAMED_CLASS()
     {
-        $this->assertEquals(Neutrino_Router::ROUTER_NAMED_CLASS, 'Neutrino_Route_Named');
+        $this->assertEquals('neutrino\route\Named', Router::ROUTER_NAMED_CLASS);
     }
 
     public function testConstROUTER_REGEX_CLASS()
     {
-        $this->assertEquals(Neutrino_Router::ROUTER_REGEX_CLASS, 'Neutrino_Route_Regex');
+        $this->assertEquals('neutrino\route\Regex', Router::ROUTER_REGEX_CLASS);
     }
 
     public function testGetDefaultRouteClass()
     {
-        $this->assertEquals($this->_createRouter()->getDefaultRouteClass(), 'Neutrino_Route_Named');
+        $this->assertEquals('neutrino\route\Named', $this->_createRouter()->getDefaultRouteClass());
     }
 
     /**
-     * @expectedException Neutrino_Router_Exception
-     * @expectedExceptionMessage Default route class must be an instance of Neutrino_Route_Abstract
+     * @expectedException neutrino\router\Exception
+     * @expectedExceptionMessage Default route class must be an instance of neutrino\route\AbstractRoute
      */
     public function testSetDefaultRouteClassShouldThrowException()
     {
-        $this->_createRouter()->setDefaultRouteClass('Neutrino');
+        $this->_createRouter()->setDefaultRouteClass('stdClass');
     }
 
     public function testSetDefaultRouteClass()
     {
         $router = $this->_createRouter();
-        $router->setDefaultRouteClass('Neutrino_Route_Regex');
+        $router->setDefaultRouteClass('neutrino\route\Regex');
 
-        $this->assertEquals($router->getDefaultRouteClass(), 'Neutrino_Route_Regex');
+        $this->assertEquals($router->getDefaultRouteClass(), 'neutrino\route\Regex');
     }
 
     public function testAdd()
     {
         $router = $this->_createRouter();
-        $route = new Neutrino_Route_Named('/test', function() {});
+        $route = new Named('/test', function() {});
         $router->add($route);
 
         $this->assertEquals($router->getRoutes(), [$route]);
     }
 
     /**
-     * @expectedException Neutrino_Router_Exception
+     * @expectedException neutrino\router\Exception
      * @expectedExceptionMessage Duplicate route with pattern '/test'
      */
     public function testNotAllowedDuplicateRouteShouldThrowException()
     {
         $router = $this->_createRouter();
 
-        $route1 = new Neutrino_Route_Named('/test', function() {});
-        $route2 = new Neutrino_Route_Named('/test', function() {});
+        $route1 = new Named('/test', function() {});
+        $route2 = new Named('/test', function() {});
 
         $router->add($route1);
         $router->add($route2);
@@ -76,8 +80,8 @@ class Neutrino_Router_Test extends PHPUnit_Framework_TestCase
 
         $routes = $router->getRoutes();
         $this->assertEquals(count($routes), 2);
-        $this->assertInstanceOf('Neutrino_Route_Named', $routes[0]);
-        $this->assertInstanceOf('Neutrino_Route_Regex', $routes[1]);
+        $this->assertInstanceOf('neutrino\route\Named', $routes[0]);
+        $this->assertInstanceOf('neutrino\route\Regex', $routes[1]);
     }
 
     public function testGet()

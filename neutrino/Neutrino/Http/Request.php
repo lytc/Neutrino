@@ -1,9 +1,12 @@
 <?php
+namespace neutrino\http;
 
-class Neutrino_Http_Request
+use neutrino\Neutrino;
+
+class Request
 {
     /**
-     * @var Neutrino_Http_Request
+     * @var Request
      */
     protected static $_instance;
     /**
@@ -31,7 +34,7 @@ class Neutrino_Http_Request
 
     /**
      * @static
-     * @return Neutrino_Http_Request
+     * @return Request
      */
     public static function getInstance()
     {
@@ -54,8 +57,8 @@ class Neutrino_Http_Request
     }
 
     /**
-     * @param $name
-     * @return mixed
+     * @param string $name
+     * @return string
      */
     public function getServer($name)
     {
