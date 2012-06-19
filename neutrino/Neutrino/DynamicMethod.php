@@ -1,6 +1,8 @@
 <?php
+namespace neutrino;
+use \Closure;
 
-class Neutrino_DynamicMethod
+class DynamicMethod
 {
     public function __call($method, $args)
     {

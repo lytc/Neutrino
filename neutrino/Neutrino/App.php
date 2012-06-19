@@ -1,6 +1,11 @@
 <?php
+namespace neutrino;
+use neutrino\Router;
+use neutrino\http\Request;
+use neutrino\http\Response;
+use Closure;
 
-class Neutrino_App
+class App
 {
     /**
      * @var string
@@ -8,17 +13,17 @@ class Neutrino_App
     protected $_baseUri = '';
 
     /**
-     * @var Neutrino_Router
+     * @var Router
      */
     protected $_router;
 
     /**
-     * @var Neutrino_Http_Request
+     * @var Request
      */
     protected $_request;
 
     /**
-     * @var Neutrino_Http_Response
+     * @var Response
      */
     protected $_response;
 
@@ -60,31 +65,34 @@ class Neutrino_App
     }
 
     /**
-     * @return Neutrino_Router
+     * @return Router
      */
     public function getRouter()
     {
         if (!$this->_router) {
-            $this->_router = new Neutrino_Router($this);
+            $this->_router = new Router($this);
         }
         return $this->_router;
     }
 
     /**
-     * @return Neutrino_Http_Request
+     * @return Request
      */
     public function getRequest()
     {
         if (!$this->_request) {
-            $this->_request = new Neutrino_Http_Request();
+            $this->_request = new Request();
         }
         return $this->_request;
     }
 
+    /**
+     * @return Response
+     */
     public function getResponse()
     {
         if (!$this->_response) {
-            $this->_response = new Neutrino_Http_Response($this);
+            $this->_response = new Response($this);
         }
         return $this->_response;
     }
@@ -92,7 +100,7 @@ class Neutrino_App
     /**
      * @param string $pattern
      * @param callable $callable
-     * @return Neutrino_Router
+     * @return Router
      */
     public function map()
     {
@@ -102,7 +110,7 @@ class Neutrino_App
     /**
      * @param string $pattern
      * @param callable $callable
-     * @return Neutrino_Router
+     * @return Router
      */
     public function get()
     {
@@ -112,7 +120,7 @@ class Neutrino_App
     /**
      * @param string $pattern
      * @param callable $callable
-     * @return Neutrino_Router
+     * @return Router
      */
     public function post()
     {
@@ -122,7 +130,7 @@ class Neutrino_App
     /**
      * @param string $pattern
      * @param callable $callable
-     * @return Neutrino_Router
+     * @return Router
      */
     public function put()
     {
@@ -132,7 +140,7 @@ class Neutrino_App
     /**
      * @param string $pattern
      * @param callable $callable
-     * @return Neutrino_Router
+     * @return Router
      */
     public function delete()
     {
@@ -153,7 +161,7 @@ class Neutrino_App
     }
 
     /**
-     * @return Neutrino
+     * @return App
      */
     public function run()
     {

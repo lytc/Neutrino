@@ -1,6 +1,9 @@
 <?php
+namespace neutrino\http;
+use neutrino\App,
+    neutrino\http\response\Exception as ResponseException;
 
-class Neutrino_Http_Response
+class Response
 {
     const CONTENT_TYPE_TEXT_HTML            = 'text/html';
     const CONTENT_TYPE_TEXT_XML             = 'text/xml';
@@ -35,7 +38,7 @@ class Neutrino_Http_Response
     /**
      * @param Neutrino $app
      */
-    public function __construct(Neutrino_App $app)
+    public function __construct(App $app)
     {
         $this->_app = $app;
     }
@@ -51,7 +54,7 @@ class Neutrino_Http_Response
 
     /**
      * @param array $headers
-     * @return Neutrino_Http_Response
+     * @return Response
      */
     public function setHeaders(array $headers)
     {
@@ -79,7 +82,7 @@ class Neutrino_Http_Response
 
     /**
      * @param int $code
-     * @return Neutrino_Http_Response
+     * @return Response
      */
     public function setCode($code)
     {
@@ -97,7 +100,7 @@ class Neutrino_Http_Response
 
     /**
      * @param $message
-     * @return Neutrino_Http_Response
+     * @return Response
      */
     public function setMessage($message)
     {
@@ -115,7 +118,7 @@ class Neutrino_Http_Response
 
     /**
      * @param string $contentType
-     * @return Neutrino_Http_Response
+     * @return Response
      */
     public function setContentType($contentType)
     {
@@ -125,13 +128,13 @@ class Neutrino_Http_Response
     /**
      * @param $url
      * @param int $code
-     * @return Neutrino_Http_Response
-     * @throws Neutrino_Http_Response_Exception
+     * @return Response
+     * @throws neutrino\http\response\Exception
      */
     public function redirect($url, $code = 302)
     {
         if ($code < 300 || $code > 307) {
-            throw new Neutrino_Http_Response_Exception('Redirect code must be >= 300 and <= 307');
+            throw new ResponseException('Redirect code must be >= 300 and <= 307');
         }
 
         return $this->setHeader('Location', $url, true, $code);
@@ -154,7 +157,7 @@ class Neutrino_Http_Response
     }
 
     /**
-     * @return Neutrino_Http_Response
+     * @return Response
      */
     public function send()
     {

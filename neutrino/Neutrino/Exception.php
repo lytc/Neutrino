@@ -1,6 +1,7 @@
 <?php
+namespace neutrino;
 
-class Neutrino_Exception extends Exception
+class Exception extends \Exception
 {
 
 }

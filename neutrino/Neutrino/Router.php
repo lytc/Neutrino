@@ -1,16 +1,24 @@
 <?php
+namespace neutrino;
 
-class Neutrino_Router
+use \Closure,
+    neutrino\Neutrino,
+    neutrino\App,
+    neutrino\route\Named,
+    neutrino\route\Regex,
+    neutrino\router\Exception as RouterException;
+
+class Router
 {
-    const ROUTER_NAMED_CLASS = 'Neutrino_Route_Named';
-    const ROUTER_REGEX_CLASS = 'Neutrino_Route_Regex';
+    const ROUTER_NAMED_CLASS = 'neutrino\route\Named';
+    const ROUTER_REGEX_CLASS = 'neutrino\route\Regex';
 
     /**
      * @var bool
      */
     protected  $_allowDuplicate = false;
 
-    protected $_defaultRouteClass = 'Neutrino_Route_Named';
+    protected $_defaultRouteClass = 'neutrino\route\Named';
 
     /**
      * @var Neutrino
@@ -25,7 +33,7 @@ class Neutrino_Router
     /**
      * @param Neutrino $app
      */
-    public function __construct(Neutrino_App $app, $allowDuplicate = false)
+    public function __construct(App $app, $allowDuplicate = false)
     {
         $this->_app = $app;
         $this->_allowDuplicate = $allowDuplicate;
@@ -41,13 +49,13 @@ class Neutrino_Router
 
     /**
      * @param $className
-     * @return Neutrino_Router
-     * @throws Neutrino_Router_Exception
+     * @return Router
+     * @throws neutrino\router\Exception
      */
     public function setDefaultRouteClass($className)
     {
-        if (!is_subclass_of($className, 'Neutrino_Route_Abstract')) {
-            throw new Neutrino_Router_Exception('Default route class must be an instance of Neutrino_Route_Abstract');
+        if (!is_subclass_of($className, 'neutrino\route\AbstractRoute')) {
+            throw new RouterException('Default route class must be an instance of neutrino\route\AbstractRoute');
         }
 
         $this->_defaultRouteClass = $className;
@@ -71,11 +79,11 @@ class Neutrino_Router
     }
 
     /**
-     * @param Neutrino_Route_Abstract $route
-     * @return Neutrino_Router
-     * @throws Neutrino_Router_Exception
+     * @param neutrino\route\AbstractRoute $route
+     * @return Router
+     * @throws neutrino\router\Exception
      */
-    public function add(Neutrino_Route_Abstract $route)
+    public function add(\neutrino\route\AbstractRoute $route)
     {
         if (!$this->_allowDuplicate) {
             $pattern = $route->getPattern();
@@ -83,7 +91,7 @@ class Neutrino_Router
 
             foreach ($this->_routes as $item) {
                 if ($pattern == $item->getPattern() && $method = $item->getMethod()) {
-                    throw new Neutrino_Router_Exception("Duplicate route with pattern '{$pattern}'");
+                    throw new RouterException("Duplicate route with pattern '{$pattern}'");
                 }
             }
         }
@@ -96,14 +104,14 @@ class Neutrino_Router
      * @param string $pattern
      * @param callable $callable
      * @param string $methods
-     * @return Neutrino_Router
+     * @return Router
      */
     public function map($pattern, $callable, $methods = Neutrino::METHOD_GET)
     {
         if ('#' == $pattern[0]) {
-            $route = new Neutrino_Route_Regex(substr($pattern, 1), $callable, $methods);
+            $route = new Regex(substr($pattern, 1), $callable, $methods);
         } else {
-            $route = new Neutrino_Route_Named($pattern, $callable, $methods);
+            $route = new Named($pattern, $callable, $methods);
         }
 
         return $this->add($route);
@@ -113,7 +121,7 @@ class Neutrino_Router
     /**
      * @param $pattern
      * @param $callable
-     * @return Neutrino_Router
+     * @return Router
      */
     public function get($pattern, $callable)
     {
@@ -123,7 +131,7 @@ class Neutrino_Router
     /**
      * @param $pattern
      * @param $callable
-     * @return Neutrino_Router
+     * @return Router
      */
     public function post($pattern, $callable)
     {
@@ -133,7 +141,7 @@ class Neutrino_Router
     /**
      * @param $pattern
      * @param $callable
-     * @return Neutrino_Router
+     * @return Router
      */
     public function put($pattern, $callable)
     {
@@ -143,7 +151,7 @@ class Neutrino_Router
     /**
      * @param $pattern
      * @param $callable
-     * @return Neutrino_Router
+     * @return Router
      */
     public function delete($pattern, $callable)
     {

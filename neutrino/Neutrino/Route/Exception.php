@@ -1,6 +1,7 @@
 <?php
+namespace neutrino\route;
 
-class Neutrino_Route_Exception extends Neutrino_Exception
+class Exception extends \neutrino\Exception
 {
 
 }

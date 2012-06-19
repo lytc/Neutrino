@@ -1,12 +1,12 @@
 <?php
-
+use neutrino\App;
 require_once dirname(__FILE__) . '/../../bootstrap.php';
 
 class Neutrino_Http_Response_Test extends PHPUnit_Framework_TestCase
 {
     public function testSetHeaderAndGetHeaders()
     {
-        $app = new Neutrino_App();
+        $app = new App();
         $response = $app->getResponse();
 
         $response->setHeader('Content-Type', 'application/json');
@@ -20,7 +20,7 @@ class Neutrino_Http_Response_Test extends PHPUnit_Framework_TestCase
 
     public function testSetCodeAndGetCode()
     {
-        $app = new Neutrino_App();
+        $app = new App();
         $response = $app->getResponse();
 
         $this->assertEquals(200, $response->getCode());
@@ -31,7 +31,7 @@ class Neutrino_Http_Response_Test extends PHPUnit_Framework_TestCase
 
     public function testSetMessageAndGetMessage()
     {
-        $app = new Neutrino_App();
+        $app = new App();
         $response = $app->getResponse();
 
         $this->assertEquals('OK', $response->getMessage());
@@ -42,7 +42,7 @@ class Neutrino_Http_Response_Test extends PHPUnit_Framework_TestCase
 
     public function testSetBodyAndGetBody()
     {
-        $app = new Neutrino_App();
+        $app = new App();
         $response = $app->getResponse();
 
         $this->assertEquals('', $response->getBody());
@@ -53,7 +53,7 @@ class Neutrino_Http_Response_Test extends PHPUnit_Framework_TestCase
 
     public function testRedirect()
     {
-        $app = new Neutrino_App();
+        $app = new App();
         $response = $app->getResponse();
 
         $response->redirect('/test');
@@ -63,7 +63,7 @@ class Neutrino_Http_Response_Test extends PHPUnit_Framework_TestCase
 
     public function testRedirectWithCode()
     {
-        $app = new Neutrino_App();
+        $app = new App();
         $response = $app->getResponse();
 
         $response->redirect('/test', 304);
@@ -72,12 +72,12 @@ class Neutrino_Http_Response_Test extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException Neutrino_Http_Response_Exception
+     * @expectedException neutrino\http\response\Exception
      * @expectedExceptionMessage Redirect code must be >= 300 and <= 307
      */
     public function testRedirectShouldThrowExceptionWithWrongCode()
     {
-        $app = new Neutrino_App();
+        $app = new App();
         $response = $app->getResponse();
 
         $response->redirect('/test', 500);

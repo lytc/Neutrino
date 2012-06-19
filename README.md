@@ -1,4 +1,4 @@
 Neutrino
 ========
 
-A small php ~> 5.4 framework
+A small PHP framework for PHP ~> 5.4

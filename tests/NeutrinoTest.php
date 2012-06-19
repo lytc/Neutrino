@@ -1,4 +1,6 @@
 <?php
+use neutrino\Neutrino,
+    neutrino\App;
 
 require_once dirname(__FILE__) . '/bootstrap.php';
 
@@ -23,7 +25,7 @@ class Neutrino_Test extends PHPUnit_Framework_TestCase
     }
 }
 
-class Posts extends Neutrino_App
+class Posts extends App
 {
     public function init()
     {
