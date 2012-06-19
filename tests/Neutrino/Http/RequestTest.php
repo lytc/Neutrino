@@ -51,9 +51,12 @@ class Request_Test extends PHPUnit_Framework_TestCase
     {
         $request = new Request();
 
-        $_SERVER['REQUEST_METHOD'] = 'GET';
+        $_SERVER['REQUEST_METHOD'] = 'POST';
 
-        $this->assertEquals('GET', $request->getMethod());
+        $this->assertEquals('POST', $request->getMethod());
+
+        $request->setParam('__METHOD__', 'DELETE');
+        $this->assertEquals('DELETE', $request->getMethod());
     }
 
     public function testIsGet()
@@ -127,6 +130,23 @@ class Request_Test extends PHPUnit_Framework_TestCase
         $this->assertEquals('test', $request->getGetParam('test'));
     }
 
+    public function testSetParam()
+    {
+        $request = new Request();
+        $request->setParam('param1', 'param1');
+
+        $this->assertEquals('param1', $request->getParam('param1'));
+    }
+
+    public function testSetParams()
+    {
+        $request = new Request();
+        $request->setParams(['param1' => 'param1', 'param2' => 2]);
+
+        $this->assertEquals('param1', $request->getParam('param1'));
+        $this->assertEquals(2, $request->getParam('param2'));
+    }
+
     public function testGetPostParam()
     {
         $request = new Request();
@@ -161,13 +181,21 @@ class Request_Test extends PHPUnit_Framework_TestCase
 
         $this->assertEquals([], $request->getAllParams());
 
-        $_REQUEST['test'] = 'test';
-        $_REQUEST['test2'] = 'test2';
-
+        $request->setParam('param1', 'param1');
+        $request->setParam('param2', 'param2');
         $allParams = $request->getAllParams();
         $this->assertEquals(2, count($allParams));
-        $this->assertContains('test', $allParams);
-        $this->assertContains('test2', $allParams);
+
+        $_REQUEST['param3'] = 'param3';
+        $_REQUEST['param4'] = 'param4';
+
+        $allParams = $request->getAllParams(true);
+        $this->assertEquals(4, count($allParams));
+
+        $this->assertContains('param1', $allParams);
+        $this->assertContains('param2', $allParams);
+        $this->assertContains('param3', $allParams);
+        $this->assertContains('param4', $allParams);
     }
 
     public function testGetSomeParams()
