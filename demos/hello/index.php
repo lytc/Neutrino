@@ -1,4 +1,5 @@
 <?php
+
 use neutrino\Neutrino,
     neutrino\App;
 
@@ -8,7 +9,14 @@ Neutrino::registerAutoLoad();
 $app = new App();
 
 $app->get('/:name', function($name) {
+    if ($name != 'ly') {
+        $this->pass();
+    }
     echo "Hello, $name!";
+});
+
+$app->get('/:who', function($who) {
+    echo "Who: $who";
 });
 
 $app->run();
