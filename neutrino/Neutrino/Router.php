@@ -8,10 +8,15 @@ use \Closure,
     neutrino\route\Regex,
     neutrino\router\Exception as RouterException;
 
-class Router
+class Router implements \Iterator
 {
     const ROUTER_NAMED_CLASS = 'neutrino\route\Named';
     const ROUTER_REGEX_CLASS = 'neutrino\route\Regex';
+
+    /**
+     * @var int
+     */
+    protected $_index = 0;
 
     /**
      * @var bool
@@ -158,23 +163,28 @@ class Router
         return $this->map($pattern, $callable, Neutrino::METHOD_DELETE);
     }
 
-    /**
-     * @return bool
-     */
-    public function dispatch()
+    public function current()
     {
-        $request = $this->_app->getRequest();
-        $uri = substr($request->getUri(), strlen($this->_app->getBaseUri()));
-        $hasMatch = false;
+        return $this->_routes[$this->_index];
+    }
 
-        foreach ($this->_routes as $route) {
-            if ($request->getMethod() == $route->getMethod() && is_array($params = $route->match($uri))) {
-                call_user_func_array(Closure::bind($route->getCallable(), $this->_app), $params);
-                $hasMatch = true;
-                break;
-            }
-        }
+    public function key()
+    {
+        return $this->_index;
+    }
 
-        return $hasMatch;
+    public function next()
+    {
+        $this->_index++;
+    }
+
+    public function rewind()
+    {
+        $this->_index = 0;
+    }
+
+    public function valid()
+    {
+        return isset($this->_routes[$this->_index]);
     }
 }

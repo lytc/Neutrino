@@ -1,9 +1,13 @@
 <?php
 namespace neutrino;
-use neutrino\Router;
-use neutrino\http\Request;
-use neutrino\http\Response;
-use Closure;
+
+use neutrino\Router,
+    neutrino\http\Request,
+    neutrino\http\Response,
+    neutrino\exception\Pass,
+    neutrino\exception\NotFound,
+    neutrino\exception\Halt,
+    Closure;
 
 class App
 {
@@ -28,9 +32,9 @@ class App
     protected $_response;
 
     /**
-     * @var callable
+     * @var Closure
      */
-    protected $_noRouteMatchCallable;
+    protected $_noRouteMatchCallback;
 
     /**
      *
@@ -148,31 +152,92 @@ class App
     }
 
     /**
-     * @return callable
+     * @return Closure
      */
-    public function getNoRouteMatchCallable()
+    public function getNoRouteMatchCallback()
     {
-        if (!$this->_noRouteMatchCallable) {
-            $this->_noRouteMatchCallable = function() {
-                $this->getResponse()->setCode(404)->setMessage('Page not found');
-            };
+        if (!$this->_noRouteMatchCallback) {
+            $this->_noRouteMatchCallback = Closure::bind(function() {
+                throw new NotFound('Page not found', 404);
+            }, $this);
         }
-        return $this->_noRouteMatchCallable;
+        return $this->_noRouteMatchCallback;
     }
 
     /**
-     * @return App
+     * @throws exception\Pass
+     */
+    public function pass()
+    {
+        throw new Pass('Punt processing to the next matching route!');
+    }
+
+    public function halt($code = 500, $headers = [], $message = '')
+    {
+        $map = [
+            // 1
+            'array array string'   => function() use (&$code, &$headers) {
+                                    $headers = $code; $code = 500;
+            },
+            'string array string'  => function() use (&$code, &$message) {
+                                    $message = $code; $code = 500;
+                                },
+            // 2
+            'integer string string' => function() use (&$headers, &$message) {
+                                    $message = $headers; $headers = [];
+                                },
+            'array string string' => function() use (&$code, &$headers, &$message) {
+                                    $message = $headers; $headers = $code; $code = 500;
+                                },
+        ];
+
+        $args = func_get_args();
+        $type = [gettype($code), gettype($headers), gettype($message)];
+        $type = implode(' ', $type);
+
+        if (isset($map[$type])) {
+            $map[$type]();
+        }
+
+        $this->getResponse()->setCode($code)
+            ->setHeaders($headers)
+            ->setBody($message);
+
+        throw new Halt();
+    }
+
+    /**
+     * @return Response
      */
     public function run()
     {
-        $hasMatch = $this->getRouter()->dispatch();
+        $request = $this->getRequest();
+        $method = $request->getMethod();
+        $uri = substr($request->getUri(), strlen($this->_baseUri));
 
-        if (!$hasMatch) {
-            $callable = Closure::bind($this->getNoRouteMatchCallable(), $this);
-            $callable();
+        $hasMatch = false;
+
+        try {
+            foreach ($this->getRouter() as $route) {
+                try {
+                    if ($method == $route->getMethod() && is_array($params = $route->match($uri))) {
+                        call_user_func_array(Closure::bind($route->getCallable(), $this), $params);
+                        $hasMatch = true;
+                        break;
+                    }
+                } catch (Pass $exception) {
+                    continue;
+                }
+            }
+
+            if (!$hasMatch) {
+                $callback = $this->getNoRouteMatchCallback();
+                $callback();
+            }
+        } catch (Halt $exception) {
+
         }
 
-        $this->getResponse()->send();
-        return $this;
+        return $this->getResponse()->send();
     }
 }

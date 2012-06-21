@@ -146,6 +146,7 @@ class Response
     public function setBody($content)
     {
         $this->_body = $content;
+        return $this;
     }
 
     /**
