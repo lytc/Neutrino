@@ -3,8 +3,8 @@ Neutrino
 
 A small PHP framework for PHP ~> 5.4
 
-#"Hello World" application
-```
+##"Hello World" application
+```php
 <?php
 use neutrino\Neutrino,
     neutrino\App;
