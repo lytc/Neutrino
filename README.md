@@ -14,8 +14,8 @@ require_once 'neutrino/Neutrino.php';
 Neutrino::registerAutoLoad();
 $app = new App();
 
-$app->get('/hello/:name', function($name) {
-    echo "Hello, $name!";
+$app->get('/', function() {
+    echo "Hello World!";
 });
 
 $app->run();
