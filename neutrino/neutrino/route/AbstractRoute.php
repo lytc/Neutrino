@@ -1,4 +1,5 @@
 <?php
+
 namespace neutrino\route;
 use neutrino\Neutrino,
     neutrino\App,
@@ -165,6 +166,10 @@ abstract class AbstractRoute
     {
         $request = $app->getRequest();
         $uri = substr($request->getUri(), strlen($app->getBaseUri()));
+
+        if (!$uri) {
+            $uri = '/';
+        }
 
         $params = $this->_matchUri($uri);
         if (is_array($params)) {

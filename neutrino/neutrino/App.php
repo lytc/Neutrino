@@ -212,8 +212,6 @@ class App
     public function run()
     {
         $request = $this->getRequest();
-        $uri = substr($request->getUri(), strlen($this->_baseUri));
-
         $hasMatch = false;
 
         try {
