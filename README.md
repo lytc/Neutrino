@@ -9,7 +9,7 @@ A small PHP framework for PHP ~> 5.4
 use neutrino\Neutrino,
     neutrino\App;
 
-require_once dirname(__FILE__) . '/../../neutrino/Neutrino.php';
+require_once 'neutrino/Neutrino.php';
 
 Neutrino::registerAutoLoad();
 $app = new App();
