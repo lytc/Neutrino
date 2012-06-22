@@ -1,5 +1,7 @@
 <?php
-
+preg_match("#^/(?<resources>[^\\/]+)/(?<id>[^\\/]+)$#", '/posts/1', $match);
+var_dump($match); exit;
+exit;
 use neutrino\Neutrino,
     neutrino\App;
 

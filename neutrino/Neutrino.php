@@ -3,7 +3,8 @@ namespace neutrino;
 
 use \Closure,
     neutrino\http\Request,
-    neutrino\DynamicMethod;
+    neutrino\DynamicMethod,
+    neutrino\exception\NotFound;
 
 
 require_once dirname(__FILE__) . '/Neutrino/Exception.php';
@@ -41,9 +42,10 @@ class Neutrino
 
     /**
      * @param string $baseUri
-     * @param callable $callable
+     * @param Closure $closure
+     * @return App
      */
-    public static function map($baseUri, $callable)
+    public static function map($baseUri, $closure)
     {
         $request = Request::getInstance();
         $uri = $request->getUri();
@@ -53,11 +55,15 @@ class Neutrino
 
             $class->run = function($appName) use ($baseUri) {
                 $app = new $appName($baseUri);
-                $app->run();
+                try {
+                    $app->run();
+                } catch (NotFound $exception) {
+
+                }
                 return $app;
             };
 
-            $app = call_user_func(\Closure::bind($callable, $class));
+            $app = call_user_func(\Closure::bind($closure, $class));
             return $app;
         }
     }

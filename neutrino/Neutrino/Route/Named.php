@@ -4,8 +4,9 @@ use neutrino\route;
 
 class Named extends AbstractRoute
 {
-    public function match($uri) {
+    protected function _matchUri($uri) {
         $pattern = preg_quote($this->_pattern, '#');
+
         $pattern = preg_replace('/\\\:([^\/]+)/', '(?<$1>[^\/]+)', $pattern);
         $pattern = "#^$pattern$#";
 

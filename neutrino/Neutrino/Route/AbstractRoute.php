@@ -1,7 +1,10 @@
 <?php
 namespace neutrino\route;
 use neutrino\Neutrino,
-    neutrino\route\Exception;
+    neutrino\App,
+    neutrino\route\Exception,
+    neutrino\http\Request,
+    \Closure;
 
 abstract class AbstractRoute
 {
@@ -11,59 +14,52 @@ abstract class AbstractRoute
     protected $_pattern;
 
     /**
-     * @var callable
+     * @var Closure
      */
-    protected $_callable;
+    protected $_callback;
 
     /**
-     * @var string
+     * @var array
      */
-    protected $_method;
+    protected $_options = [
+        'method'    => Neutrino::METHOD_GET
+    ];
 
     /**
      * @abstract
-     * @param string $uri
-     * @return boolean
+     * @param String $uri
+     * @return array
      */
-    abstract public function match($uri);
+    abstract protected function _matchUri($uri);
 
     /**
      * @param string $pattern
-     * @param callable $callable
+     * @param array|Closure $options
+     * @param Closure $callback
      * @param string $methods
      */
-    public function __construct($pattern, $callable, $method = Neutrino::METHOD_GET)
+    public function __construct($pattern, $options, $callback = null)
     {
         $this->_pattern = $pattern;
-        $this->_callable = $callable;
-
-        $method = strtoupper($method);
-        $supportMethods = array(
-            Neutrino::METHOD_GET,
-            Neutrino::METHOD_POST,
-            Neutrino::METHOD_PUT,
-            Neutrino::METHOD_DELETE,
-            Neutrino::METHOD_OPTIONS,
-            Neutrino::METHOD_HEAD
-        );
-        if (!in_array($method, $supportMethods)) {
-            throw new Exception(
-                "The request method must be GET, POST, PUT, DELETE, OPTIONS or HEAD. '$method' given.");
+        if (null === $callback) {
+            $this->_callback = $options;
+        } else {
+            $this->_options = $options;
+            $this->_callback = $callback;
         }
-        $this->_method = $method;
     }
 
     /**
      * @static
      * @param string $pattern
-     * @param callable $callable
+     * @param Closure $callback
      * @param string $method
      * @return AbstractRoute
      */
-    public static function createInstance($pattern, $callable, $method = Neutrino::METHOD_GET)
+    public static function createInstance($pattern, $options, $callback = null)
     {
         $className = get_called_class();
-        return new $className($pattern, $callable, $method);
+        return new $className($pattern, $options, $callback);
     }
 
     /**
@@ -79,57 +75,133 @@ abstract class AbstractRoute
      */
     public function getMethod()
     {
-        return $this->_method;
+        return $this->_options['method'];
     }
 
     /**
-     * @return callable
+     * @return Closuere
      */
-    public function getCallable()
+    public function getCallback()
     {
-        return $this->_callable;
+        return $this->_callback;
     }
 
     /**
      * @static
      * @param $pattern
-     * @param $callable
+     * @param array|Closure $options
+     * @param Closure $callback
      * @return AbstractRoute
      */
-    public static function get($pattern, $callable) {
-        return self::createInstance($pattern, $callable);
+    public static function get($pattern, $options, $callback = null) {
+        if (null === $callback) {
+            $callback = $options;
+            $options = [];
+        }
+        $options['method'] = Neutrino::METHOD_GET;
+
+        return self::createInstance($pattern, $options, $callback);
     }
 
     /**
      * @static
      * @param string $pattern
-     * @param callable $callable
+     * @param array|Closure $options
+     * @param Closure $callback
      * @return AbstractRoute
      */
-    public static function post($pattern, $callable)
+    public static function post($pattern, $options, $callback = null)
     {
-        return self::createInstance($pattern, $callable, Neutrino::METHOD_POST);
+        if (null === $callback) {
+            $callback = $options;
+            $options = [];
+        }
+        $options['method'] = Neutrino::METHOD_POST;
+
+        return self::createInstance($pattern, $options, $callback);
     }
 
     /**
      * @static
      * @param string $pattern
-     * @param callable $callable
+     * @param array|Closure $options
+     * @param Closure $callback
      * @return AbstractRoute
      */
-    public static function put($pattern, $callable)
+    public static function put($pattern, $options, $callback = null)
     {
-        return self::createInstance($pattern, $callable, Neutrino::METHOD_PUT);
+        if (null === $callback) {
+            $callback = $options;
+            $options = [];
+        }
+        $options['method'] = Neutrino::METHOD_PUT;
+
+        return self::createInstance($pattern, $options, $callback);
     }
 
     /**
      * @static
      * @param string $pattern
-     * @param callable $callable
+     * @param array|Closure $options
+     * @param Closure $callback
      * @return AbstractRoute
      */
-    public static function delete($pattern, $callable)
+    public static function delete($pattern, $options, $callback = null)
     {
-        return self::createInstance($pattern, $callable, Neutrino::METHOD_DELETE);
+        if (null === $callback) {
+            $callback = $options;
+            $options = [];
+        }
+        $options['method'] = Neutrino::METHOD_DELETE;
+
+        return self::createInstance($pattern, $options, $callback);
+    }
+
+    /**
+     * @param App $app
+     * @return array
+     */
+    public function match(App $app)
+    {
+        $request = $app->getRequest();
+        $uri = substr($request->getUri(), strlen($app->getBaseUri()));
+
+        $params = $this->_matchUri($uri);
+        if (is_array($params)) {
+            if ($this->_matchOptions($app)) {
+                return $params;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * @param App $app
+     * @return boolean
+     */
+    protected function _matchOptions(App $app)
+    {
+        if (!count($this->_options)) {
+            return true;
+        }
+        foreach ($this->_options as $matchMethod => $option) {
+            $matchMethod = '_match' . ucfirst($matchMethod);
+
+            if (!$this->{$matchMethod}($app, $option)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    protected function _matchMethod(App $app, $method)
+    {
+        $request = $app->getRequest();
+
+        if ($request->getMethod() == strtoupper($method)) {
+            return true;
+        }
     }
 }

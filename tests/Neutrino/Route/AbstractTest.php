@@ -6,7 +6,7 @@ require_once dirname(__FILE__) . '/../../bootstrap.php';
 
 class MyRoute extends AbstractRoute
 {
-    public function match($uri) {}
+    protected function _matchUri($uri) {}
 }
 
 class Neutrino_Route_Abstract_Test extends PHPUnit_Framework_TestCase
@@ -15,15 +15,6 @@ class Neutrino_Route_Abstract_Test extends PHPUnit_Framework_TestCase
     {
         $route = MyRoute::createInstance('/test', function() {});
         $this->assertInstanceOf('MyRoute', $route);
-    }
-
-    /**
-     * @expectedException neutrino\route\Exception
-     * @expectedExceptionMessage The request method must be GET, POST, PUT, DELETE, OPTIONS or HEAD. 'TRACE' given.
-     */
-    public function testWithUnExpectedRequestMethodShouldThrowException()
-    {
-        MyRoute::createInstance('/test', function() {}, 'TRACE');
     }
 
     public function testGetPattern()
@@ -39,19 +30,19 @@ class Neutrino_Route_Abstract_Test extends PHPUnit_Framework_TestCase
         $this->assertEquals(Neutrino::METHOD_GET, $route->getMethod());
     }
 
-    public function testGetCallable()
+    public function testGetCallback()
     {
-        $callable = function() {};
-        $route = new MyRoute('/test', $callable);
-        $this->assertEquals($callable, $route->getCallable());
+        $callback = function() {};
+        $route = new MyRoute('/test', $callback);
+        $this->assertEquals($callback, $route->getCallback());
     }
 
     public function testGet()
     {
         $pattern = '/test';
-        $callable = function() {};
+        $callback = function() {};
 
-        $route = MyRoute::get($pattern, $callable);
+        $route = MyRoute::get($pattern, $callback);
 
         $this->assertEquals(Neutrino::METHOD_GET, $route->getMethod());
     }
@@ -59,9 +50,9 @@ class Neutrino_Route_Abstract_Test extends PHPUnit_Framework_TestCase
     public function testPost()
     {
         $pattern = '/test';
-        $callable = function() {};
+        $callback = function() {};
 
-        $route = MyRoute::post($pattern, $callable);
+        $route = MyRoute::post($pattern, $callback);
 
         $this->assertEquals(Neutrino::METHOD_POST, $route->getMethod());
     }
@@ -69,9 +60,9 @@ class Neutrino_Route_Abstract_Test extends PHPUnit_Framework_TestCase
     public function testPut()
     {
         $pattern = '/test';
-        $callable = function() {};
+        $callback = function() {};
 
-        $route = MyRoute::put($pattern, $callable);
+        $route = MyRoute::put($pattern, $callback);
 
         $this->assertEquals(Neutrino::METHOD_PUT, $route->getMethod());
     }
@@ -79,9 +70,9 @@ class Neutrino_Route_Abstract_Test extends PHPUnit_Framework_TestCase
     public function testDelete()
     {
         $pattern = '/test';
-        $callable = function() {};
+        $callback = function() {};
 
-        $route = MyRoute::delete($pattern, $callable);
+        $route = MyRoute::delete($pattern, $callback);
 
         $this->assertEquals(Neutrino::METHOD_DELETE, $route->getMethod());
     }

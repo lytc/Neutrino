@@ -35,9 +35,9 @@ class Request
     protected $_customParams = array();
 
     /**
-     * @var callable
+     * @var Closure
      */
-    protected $_callableMethodOverride;
+    protected $_callbackMethodOverride;
 
     /**
      * @param Neutrino $app
@@ -46,7 +46,7 @@ class Request
     {
         $this->_uri = $uri;
 
-        $this->_callableMethodOverride = \Closure::bind(function() {
+        $this->_callbackMethodOverride = \Closure::bind(function() {
             if ($method = $this->getParam('__METHOD__')) {
                 return $method;
             }
@@ -73,12 +73,12 @@ class Request
     }
 
     /**
-     * @param callable $callable
+     * @param Closure $callback
      * @return Request
      */
-    public function setCallableMethodOverride($callable)
+    public function setCallbackMethodOverride($callback)
     {
-        $this->_callableMethodOverride = \Closure::bind($callable, $this);
+        $this->_callbackMethodOverride = \Closure::bind($callback, $this);
         return $this;
     }
 
@@ -147,7 +147,7 @@ class Request
      */
     public function getMethod()
     {
-        return call_user_func($this->_callableMethodOverride);
+        return call_user_func($this->_callbackMethodOverride);
     }
 
     /**
