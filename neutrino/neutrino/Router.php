@@ -107,16 +107,16 @@ class Router implements \Iterator
 
     /**
      * @param string $pattern
-     * @param callable $callable
-     * @param string $methods
+     * @param array|Closure $options
+     * @param Closure $closure
      * @return Router
      */
-    public function map($pattern, $callable, $methods = Neutrino::METHOD_GET)
+    public function map($pattern, $options, $callback = null)
     {
         if ('#' == $pattern[0]) {
-            $route = new Regex(substr($pattern, 1), $callable, $methods);
+            $route = new Regex(substr($pattern, 1), $options, $callback);
         } else {
-            $route = new Named($pattern, $callable, $methods);
+            $route = new Named($pattern, $options, $callback);
         }
 
         return $this->add($route);
@@ -124,43 +124,65 @@ class Router implements \Iterator
     }
 
     /**
-     * @param $pattern
-     * @param $callable
+     * @param string $pattern
+     * @param array|Closure
+     * @param $callback
      * @return Router
      */
-    public function get($pattern, $callable)
+    public function get($pattern, $options, $callback = null)
     {
-        return $this->map($pattern, $callable);
+        return $this->map($pattern, $options, $callback);
     }
 
     /**
-     * @param $pattern
-     * @param $callable
+     * @param string $pattern
+     * @param array|Closure
+     * @param $callback
      * @return Router
      */
-    public function post($pattern, $callable)
+    public function post($pattern, $options, $callback = null)
     {
-        return $this->map($pattern, $callable, Neutrino::METHOD_POST);
+        if (null === $callback) {
+            $callback = $options;
+            $options = [];
+        }
+        $options['method'] = Neutrino::METHOD_POST;
+
+        return $this->map($pattern, $options, $callback);
     }
 
     /**
-     * @param $pattern
-     * @param $callable
+     * @param string $pattern
+     * @param array|Closure $options
+     * @param Closure $callback
      * @return Router
      */
-    public function put($pattern, $callable)
+    public function put($pattern, $options, $callback = null)
     {
-        return $this->map($pattern, $callable, Neutrino::METHOD_PUT);
+        if (null === $callback) {
+            $callback = $options;
+            $options = [];
+        }
+        $options['method'] = Neutrino::METHOD_PUT;
+
+        return $this->map($pattern, $options, Neutrino::METHOD_PUT);
     }
 
     /**
-     * @param $pattern
-     * @param $callable
+     * @param string $pattern
+     * @param array|Closure $options
+     * @param Closure $callback
      * @return Router
      */
-    public function delete($pattern, $callable)
+    public function delete($pattern, $options, $callback = null)
     {
-        return $this->map($pattern, $callable, Neutrino::METHOD_DELETE);
+        if (null === $callback) {
+            $callback = $options;
+            $options = [];
+        }
+        $options['method'] = Neutrino::METHOD_DELETE;
+
+        return $this->map($pattern, $options, $callback);
     }
 
     public function current()

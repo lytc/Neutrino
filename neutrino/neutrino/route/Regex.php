@@ -4,7 +4,7 @@ use neutrino\route;
 
 class Regex extends AbstractRoute
 {
-    public function match($uri)
+    protected function _matchUri($uri)
     {
         if (preg_match("#{$this->_pattern}#", $uri, $matches)) {
             array_shift($matches);

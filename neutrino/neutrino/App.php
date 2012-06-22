@@ -103,7 +103,7 @@ class App
 
     /**
      * @param string $pattern
-     * @param callable $callable
+     * @param Closure $callback
      * @return Router
      */
     public function map()
@@ -113,7 +113,7 @@ class App
 
     /**
      * @param string $pattern
-     * @param callable $callable
+     * @param Closure $callback
      * @return Router
      */
     public function get()
@@ -123,7 +123,7 @@ class App
 
     /**
      * @param string $pattern
-     * @param callable $callable
+     * @param Closure $callback
      * @return Router
      */
     public function post()
@@ -133,7 +133,7 @@ class App
 
     /**
      * @param string $pattern
-     * @param callable $callable
+     * @param Closure $callback
      * @return Router
      */
     public function put()
@@ -143,7 +143,7 @@ class App
 
     /**
      * @param string $pattern
-     * @param callable $callable
+     * @param Closure $callback
      * @return Router
      */
     public function delete()
@@ -212,16 +212,13 @@ class App
     public function run()
     {
         $request = $this->getRequest();
-        $method = $request->getMethod();
-        $uri = substr($request->getUri(), strlen($this->_baseUri));
-
         $hasMatch = false;
 
         try {
             foreach ($this->getRouter() as $route) {
                 try {
-                    if ($method == $route->getMethod() && is_array($params = $route->match($uri))) {
-                        call_user_func_array(Closure::bind($route->getCallable(), $this), $params);
+                    if (is_array($params = $route->match($this))) {
+                        call_user_func_array(Closure::bind($route->getCallback(), $this), $params);
                         $hasMatch = true;
                         break;
                     }

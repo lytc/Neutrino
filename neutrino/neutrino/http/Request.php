@@ -25,11 +25,39 @@ class Request
     protected $_headers = null;
 
     /**
+     * @var array
+     */
+    protected $_cachedParams = null;
+
+    /**
+     * @var array
+     */
+    protected $_customParams = array();
+
+    /**
+     * @var Closure
+     */
+    protected $_callbackMethodOverride;
+
+    /**
      * @param Neutrino $app
      */
     public function __construct($uri = null)
     {
         $this->_uri = $uri;
+
+        $this->_callbackMethodOverride = \Closure::bind(function() {
+            if ($method = $this->getParam('__METHOD__')) {
+                return $method;
+            }
+
+            if ($method = $this->getHeader('X-HTTP-Method-Override')) {
+                return $method;
+            }
+
+            return $this->getServer('REQUEST_METHOD');
+
+        }, $this);
     }
 
     /**
@@ -42,6 +70,16 @@ class Request
             self::$_instance = new self();
         }
         return self::$_instance;
+    }
+
+    /**
+     * @param Closure $callback
+     * @return Request
+     */
+    public function setCallbackMethodOverride($callback)
+    {
+        $this->_callbackMethodOverride = \Closure::bind($callback, $this);
+        return $this;
     }
 
     /**
@@ -109,7 +147,7 @@ class Request
      */
     public function getMethod()
     {
-        return strtoupper($this->getServer('REQUEST_METHOD'));
+        return call_user_func($this->_callbackMethodOverride);
     }
 
     /**
@@ -200,20 +238,53 @@ class Request
 
     /**
      * @param string $name
+     * @param mixed $value
+     * @return Request
+     */
+    public function setParam($name, $value)
+    {
+        $this->_customParams[$name] = $value;
+        return $this;
+    }
+
+    /**
+     * @param array $params
+     * @return Request
+     */
+    public function setParams(array $params)
+    {
+        $this->_customParams = array_merge($this->_customParams, $params);
+        return $this;
+    }
+
+    /**
+     * @param string $name
      * @param mixed $default
      * @return mixed
      */
     public function getParam($name, $default = null)
     {
-        return isset($_REQUEST[$name])? $_REQUEST[$name] : $default;
+        $allParams = $this->getAllParams();
+
+        if (isset($allParams[$name])) {
+            return $allParams[$name];
+        }
+
+        return $default;
     }
 
     /**
      * @return array
      */
-    public function getAllParams()
+    public function getAllParams($forceNew = false)
     {
-        return array_merge($_GET, $_POST, $_COOKIE, $_REQUEST);
+        if ($forceNew || null === $this->_cachedParams) {
+            $this->_cachedParams = array_merge($_GET, $_POST, $_COOKIE, $_REQUEST);
+        }
+
+        $this->_cachedParams = array_merge($this->_cachedParams, $this->_customParams);
+
+        return $this->_cachedParams;
     }
 
     public function getSomeParams($names)
