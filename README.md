@@ -4,7 +4,7 @@ Neutrino
 A small PHP framework for PHP ~> 5.4
 
 #"Hello World" application
-'''
+```
 <?php
 use neutrino\Neutrino,
     neutrino\App;
@@ -19,4 +19,4 @@ $app->get('/hello/:name', function($name) {
 });
 
 $app->run();
-'''
+```
