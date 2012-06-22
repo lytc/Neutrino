@@ -131,7 +131,7 @@ class Response
      * @return Response
      * @throws neutrino\http\response\Exception
      */
-    public function redirect($url, $code = 302)
+    public function redirect($url, $code = 301)
     {
         if ($code < 300 || $code > 307) {
             throw new ResponseException('Redirect code must be >= 300 and <= 307');
