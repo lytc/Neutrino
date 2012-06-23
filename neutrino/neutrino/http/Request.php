@@ -1,7 +1,8 @@
 <?php
 namespace neutrino\http;
 
-use neutrino\Neutrino;
+use neutrino\Neutrino,
+    neutrino\Regex;
 
 class Request
 {
@@ -204,6 +205,60 @@ class Request
     public function isXhr()
     {
         return $this->getServer('X_REQUESTED_WITH') == 'XMLHttpRequest';
+    }
+
+    /**
+     * @param string|Regex $condition
+     */
+    public function isAgent($condition)
+    {
+        $agent = $this->getHeader('USER_AGENT');
+
+        if ($condition instanceof Regex) {
+            return !!$condition->match($agent);
+        }
+
+        $agent = strtolower($agent);
+        $condition = strtolower($condition);
+        switch ($condition) {
+            case 'opera':
+                return !!preg_match('/opera/', $agent);
+
+            case 'chrome':
+                return !!preg_match('/\bchrome\b/', $agent);
+
+            case 'webkit':
+                return !!preg_match('/webkit/', $agent);
+
+            case 'gecko':
+                return !preg_match('/webkit/', $agent) && !!preg_match('/gecko/', $agent);
+
+            case 'safari':
+                return !preg_match('/\bchrome\b/', $agent) && !! preg_match('/safari/', $agent);
+
+            case 'ie':
+                return !preg_match('/opera/', $agent) && !!preg_match('/msie/', $agent);
+
+            case 'firefox':
+                return preg_match('/firefox/', $agent);
+
+            case 'windows':
+                return !!preg_match('/windows|win32/', $agent);
+
+            case 'mac':
+                return !!preg_match('/macintosh|mac os x/', $agent);
+
+            case 'linux':
+                return !!preg_match('/linux/', $agent);
+        }
+    }
+
+    /**
+     * @return bool
+     */
+    public function isHttps()
+    {
+        return !!$this->getServer('HTTPS');
     }
 
     /**

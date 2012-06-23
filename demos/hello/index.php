@@ -1,4 +1,5 @@
 <?php
+var_dump($_SERVER); exit;
 use neutrino\Neutrino,
     neutrino\App;
 
