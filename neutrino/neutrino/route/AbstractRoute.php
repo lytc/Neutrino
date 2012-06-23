@@ -22,9 +22,7 @@ abstract class AbstractRoute
     /**
      * @var array
      */
-    protected $_options = [
-        'method'    => Neutrino::METHOD_GET
-    ];
+    protected $_conditions = [];
 
     /**
      * @abstract
@@ -35,17 +33,17 @@ abstract class AbstractRoute
 
     /**
      * @param string $pattern
-     * @param array|Closure $options
+     * @param array|Closure $conditions
      * @param Closure $callback
      * @param string $methods
      */
-    public function __construct($pattern, $options, $callback = null)
+    public function __construct($pattern, $conditions, $callback = null)
     {
         $this->_pattern = $pattern;
         if (null === $callback) {
-            $this->_callback = $options;
+            $this->_callback = $conditions;
         } else {
-            $this->_options = $options;
+            $this->_conditions = $conditions;
             $this->_callback = $callback;
         }
     }
@@ -57,10 +55,10 @@ abstract class AbstractRoute
      * @param string $method
      * @return AbstractRoute
      */
-    public static function createInstance($pattern, $options, $callback = null)
+    public static function createInstance($pattern, $conditions, $callback = null)
     {
         $className = get_called_class();
-        return new $className($pattern, $options, $callback);
+        return new $className($pattern, $conditions, $callback);
     }
 
     /**
@@ -76,7 +74,8 @@ abstract class AbstractRoute
      */
     public function getMethod()
     {
-        return $this->_options['method'];
+        return isset($this->_conditions['method'])?
+                $this->_conditions['method'] : Neutrino::METHOD_GET;
     }
 
     /**
@@ -90,72 +89,72 @@ abstract class AbstractRoute
     /**
      * @static
      * @param $pattern
-     * @param array|Closure $options
+     * @param array|Closure $conditions
      * @param Closure $callback
      * @return AbstractRoute
      */
-    public static function get($pattern, $options, $callback = null) {
+    public static function get($pattern, $conditions, $callback = null) {
         if (null === $callback) {
-            $callback = $options;
-            $options = [];
+            $callback = $conditions;
+            $conditions = [];
         }
-        $options['method'] = Neutrino::METHOD_GET;
+        $conditions['method'] = Neutrino::METHOD_GET;
 
-        return self::createInstance($pattern, $options, $callback);
+        return self::createInstance($pattern, $conditions, $callback);
     }
 
     /**
      * @static
      * @param string $pattern
-     * @param array|Closure $options
+     * @param array|Closure $conditions
      * @param Closure $callback
      * @return AbstractRoute
      */
-    public static function post($pattern, $options, $callback = null)
+    public static function post($pattern, $conditions, $callback = null)
     {
         if (null === $callback) {
-            $callback = $options;
-            $options = [];
+            $callback = $conditions;
+            $conditions = [];
         }
-        $options['method'] = Neutrino::METHOD_POST;
+        $conditions['method'] = Neutrino::METHOD_POST;
 
-        return self::createInstance($pattern, $options, $callback);
+        return self::createInstance($pattern, $conditions, $callback);
     }
 
     /**
      * @static
      * @param string $pattern
-     * @param array|Closure $options
+     * @param array|Closure $conditions
      * @param Closure $callback
      * @return AbstractRoute
      */
-    public static function put($pattern, $options, $callback = null)
+    public static function put($pattern, $conditions, $callback = null)
     {
         if (null === $callback) {
-            $callback = $options;
-            $options = [];
+            $callback = $conditions;
+            $conditions = [];
         }
-        $options['method'] = Neutrino::METHOD_PUT;
+        $conditions['method'] = Neutrino::METHOD_PUT;
 
-        return self::createInstance($pattern, $options, $callback);
+        return self::createInstance($pattern, $conditions, $callback);
     }
 
     /**
      * @static
      * @param string $pattern
-     * @param array|Closure $options
+     * @param array|Closure $conditions
      * @param Closure $callback
      * @return AbstractRoute
      */
-    public static function delete($pattern, $options, $callback = null)
+    public static function delete($pattern, $conditions, $callback = null)
     {
         if (null === $callback) {
-            $callback = $options;
-            $options = [];
+            $callback = $conditions;
+            $conditions = [];
         }
-        $options['method'] = Neutrino::METHOD_DELETE;
+        $conditions['method'] = Neutrino::METHOD_DELETE;
 
-        return self::createInstance($pattern, $options, $callback);
+        return self::createInstance($pattern, $conditions, $callback);
     }
 
     /**
@@ -187,26 +186,14 @@ abstract class AbstractRoute
      */
     protected function _matchOptions(App $app)
     {
-        if (!count($this->_options)) {
-            return true;
-        }
-        foreach ($this->_options as $matchMethod => $option) {
-            $matchMethod = '_match' . ucfirst($matchMethod);
+        foreach ($this->_conditions as $type => $condition) {
+            $matchClassName = 'neutrino\\route\\match\\' . ucfirst($type);
 
-            if (!$this->{$matchMethod}($app, $option)) {
+            if (!(new $matchClassName($app, $condition))->match()) {
                 return false;
             }
         }
 
         return true;
-    }
-
-    protected function _matchMethod(App $app, $method)
-    {
-        $request = $app->getRequest();
-
-        if ($request->getMethod() == strtoupper($method)) {
-            return true;
-        }
     }
 }

@@ -172,6 +172,12 @@ class App
         throw new Pass('Punt processing to the next matching route!');
     }
 
+    /**
+     * @param int $code
+     * @param array|string $headers
+     * @param string $message
+     * @throws exception\Halt
+     */
     public function halt($code = 500, $headers = [], $message = '')
     {
         $map = [
@@ -191,7 +197,6 @@ class App
                                 },
         ];
 
-        $args = func_get_args();
         $type = [gettype($code), gettype($headers), gettype($message)];
         $type = implode(' ', $type);
 
@@ -204,6 +209,27 @@ class App
             ->setBody($message);
 
         throw new Halt();
+    }
+
+    /**
+     * @param string $url
+     * @param int $code
+     */
+    public function redirect($url, $code = 301)
+    {
+        $this->getResponse()->redirect($url, $code);
+    }
+
+    /**
+     * @param int $code
+     */
+    public function redirectBack($code = 301)
+    {
+        $referrer = $this->getRequest()->getServer('HTTP_REFERER');
+
+        if ($referrer) {
+            return $this->redirect($referrer, $code);
+        }
     }
 
     /**

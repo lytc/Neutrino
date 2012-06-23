@@ -57,7 +57,7 @@ class Neutrino_Http_Response_Test extends PHPUnit_Framework_TestCase
         $response = $app->getResponse();
 
         $response->redirect('/test');
-        $expected = [['name' => 'Location', 'value' => '/test', 'replace' => true, 'code' => 302]];
+        $expected = [['name' => 'Location', 'value' => '/test', 'replace' => true, 'code' => 301]];
         $this->assertEquals($expected, $response->getHeaders());
     }
 
