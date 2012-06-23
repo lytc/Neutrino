@@ -4,6 +4,7 @@ namespace neutrino;
 use neutrino\Router,
     neutrino\http\Request,
     neutrino\http\Response,
+    neutrino\View,
     neutrino\exception\Pass,
     neutrino\exception\NotFound,
     neutrino\exception\Halt,
@@ -30,6 +31,16 @@ class App
      * @var Response
      */
     protected $_response;
+
+    /**
+     * @var string
+     */
+    protected $_viewPath = 'views';
+
+    /**
+     * @var View
+     */
+    protected $_view;
 
     /**
      * @var Closure
@@ -99,6 +110,56 @@ class App
             $this->_response = new Response($this);
         }
         return $this->_response;
+    }
+
+    /**
+     * @param string $path
+     * @return App
+     */
+    public function setViewPath($path)
+    {
+        $this->_viewPath = $path;
+        return $this;
+    }
+
+    /**
+     * @return View
+     */
+    public function getView()
+    {
+        if (!$this->_view) {
+            $this->_view = new View();
+            $this->_view->setScope($this);
+        }
+        return $this->_view;
+    }
+
+    /**
+     * @param string $script
+     * @param bool $fromViewPath
+     * @return string
+     */
+    public function render($script, $fromViewPath = true)
+    {
+        if ($fromViewPath) {
+            $script = $this->_viewPath . $script;
+        }
+
+        return $this->getView()->render($script);
+    }
+
+    /**
+     * @param $script
+     * @param bool $fromViewPath
+     * @return string
+     */
+    public function display($script, $fromViewPath = true)
+    {
+        if ($fromViewPath) {
+            $script = $this->_viewPath . $script;
+        }
+
+        return $this->getView()->display($script);
     }
 
     /**
@@ -240,6 +301,8 @@ class App
         $request = $this->getRequest();
         $hasMatch = false;
 
+        ob_start();
+
         try {
             foreach ($this->getRouter() as $route) {
                 try {
@@ -261,6 +324,7 @@ class App
 
         }
 
-        return $this->getResponse()->send();
+        $content = ob_get_clean();
+        return $this->getResponse()->setBody($content)->send();
     }
 }
