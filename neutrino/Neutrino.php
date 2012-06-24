@@ -2,6 +2,7 @@
 namespace neutrino;
 
 use \Closure,
+    neutrino\App,
     neutrino\http\Request,
     neutrino\DynamicMethod,
     neutrino\exception\NotFound;
@@ -17,6 +18,29 @@ class Neutrino
     const METHOD_DELETE     = 'DELETE';
     const METHOD_OPTIONS    = 'OPTIONS';
     const METHOD_HEAD       = 'HEAD';
+
+    /**
+     * @var Neutrino
+     */
+    protected static $_instance;
+
+    /**
+     * @var array
+     */
+    protected $_map = [];
+
+    /**
+     * @static
+     * @return Neutrino
+     */
+    public static function getInstance()
+    {
+        if (!self::$_instance) {
+            self::$_instance = new self();
+        }
+
+        return self::$_instance;
+    }
 
     /**
      * @static
@@ -41,30 +65,40 @@ class Neutrino
     }
 
     /**
-     * @param string $baseUri
+     * @param string $pattern
      * @param Closure $closure
-     * @return App
+     * @return Neutrino
      */
-    public static function map($baseUri, $closure)
+    public function map($pattern, Closure $closure)
+    {
+        $this->_map[$pattern] = $closure;
+        return $this;
+    }
+
+    /**
+     * @return App
+     * @throws NotFound
+     */
+    public function run()
     {
         $request = Request::getInstance();
         $uri = $request->getUri();
+        foreach ($this->_map as $pattern => $closure) {
+            if (substr($uri, 0, strlen($pattern)) == $pattern) {
+                $class = new DynamicMethod();
+                $class->run = function($appName) use ($pattern) {
+                    $app = new $appName($pattern);
 
-        if (substr($uri, 0, strlen($baseUri)) == $baseUri) {
-            $class = new DynamicMethod();
+                    try {
+                        $app->run();
+                    } catch (NotFound $exception) {
 
-            $class->run = function($appName) use ($baseUri) {
-                $app = new $appName($baseUri);
-                try {
-                    $app->run();
-                } catch (NotFound $exception) {
-
-                }
-                return $app;
-            };
-
-            $app = call_user_func(\Closure::bind($closure, $class));
-            return $app;
+                    }
+                };
+                return call_user_func(Closure::bind($closure, $class));
+            }
         }
+
+        throw new NotFound('Page not found', 404);
     }
 }
