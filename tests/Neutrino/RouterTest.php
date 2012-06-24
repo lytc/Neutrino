@@ -56,21 +56,6 @@ class Router_Test extends PHPUnit_Framework_TestCase
         $this->assertEquals($router->getRoutes(), [$route]);
     }
 
-    /**
-     * @expectedException neutrino\router\Exception
-     * @expectedExceptionMessage Duplicate route with pattern '/test'
-     */
-    public function testNotAllowedDuplicateRouteShouldThrowException()
-    {
-        $router = $this->_createRouter();
-
-        $route1 = new Named('/test', function() {});
-        $route2 = new Named('/test', function() {});
-
-        $router->add($route1);
-        $router->add($route2);
-    }
-
     public function testMap()
     {
         $router = $this->_createRouter();

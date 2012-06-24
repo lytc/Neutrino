@@ -108,7 +108,6 @@ class Neutrino_App_Test extends PHPUnit_Framework_TestCase
         $this->assertEquals(0, $test);
         $this->assertEquals(500, $response->getCode());
         $this->assertEquals([], $response->getHeaders());
-        $this->assertEquals('message', $response->getBody());
     }
 
     public function testHaltWith2Param()
@@ -128,7 +127,6 @@ class Neutrino_App_Test extends PHPUnit_Framework_TestCase
         $this->assertEquals(0, $test);
         $this->assertEquals(401, $response->getCode());
         $this->assertEquals([], $response->getHeaders());
-        $this->assertEquals('message', $response->getBody());
     }
 
     public function testBefore()

@@ -1,0 +1,30 @@
+<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+<script type="text/javascript">
+    $(function() {
+        $('a[method=delete]').click(function(e) {
+            e.preventDefault();
+
+            if (!confirm('Are you sure?')) {
+                return false;
+            }
+
+            var url = $(this).attr('href');
+            var form = $('<form action="' + url + '" method=post></form>');
+            form.append('<input type=hidden name="__METHOD__" value="DELETE" />');
+            form.appendTo(document.body);
+            form.submit();
+        });
+    });
+</script>
+<h1>Todos</h1>
+<a href="/add">Add</a>
+
+<ul>
+    <?php foreach ($this->items as $id => $name): ?>
+    <li>
+        <?= $name ?>
+        <a href="/<?= $id ?>/update">Update</a> |
+        <a href="/<?= $id ?>" method="delete">Delete</a>
+    </li>
+    <?php endforeach ?>
+</ul>

@@ -1,0 +1,6 @@
+<h1>Todos > Update</h1>
+<form action="/<?= $this->id ?>" method="POST">
+    <input type="hidden" name="__METHOD__" value="PUT">
+    <label>Name: <input type="text" name="name" value="<?= $this->name ?>"></label>
+    <input type="submit" value="Submit">
+</form>

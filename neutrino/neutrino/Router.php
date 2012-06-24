@@ -19,10 +19,8 @@ class Router implements \Iterator
     protected $_index = 0;
 
     /**
-     * @var bool
+     * @var string
      */
-    protected  $_allowDuplicate = false;
-
     protected $_defaultRouteClass = 'neutrino\route\Named';
 
     /**
@@ -38,10 +36,9 @@ class Router implements \Iterator
     /**
      * @param Neutrino $app
      */
-    public function __construct(App $app, $allowDuplicate = false)
+    public function __construct(App $app)
     {
         $this->_app = $app;
-        $this->_allowDuplicate = $allowDuplicate;
     }
 
     /**
@@ -86,21 +83,9 @@ class Router implements \Iterator
     /**
      * @param neutrino\route\AbstractRoute $route
      * @return Router
-     * @throws neutrino\router\Exception
      */
     public function add(\neutrino\route\AbstractRoute $route)
     {
-        if (!$this->_allowDuplicate) {
-            $pattern = $route->getPattern();
-            $method = $route->getMethod();
-
-            foreach ($this->_routes as $item) {
-                if ($pattern == $item->getPattern() && $method = $item->getMethod()) {
-                    throw new RouterException("Duplicate route with pattern '{$pattern}'");
-                }
-            }
-        }
-
         $this->_routes[] = $route;
         return $this;
     }
@@ -165,7 +150,7 @@ class Router implements \Iterator
         }
         $options['method'] = Neutrino::METHOD_PUT;
 
-        return $this->map($pattern, $options, Neutrino::METHOD_PUT);
+        return $this->map($pattern, $options, $callback);
     }
 
     /**
