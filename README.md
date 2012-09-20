@@ -1,7 +1,7 @@
 Neutrino
 ========
 
-A small PHP framework for PHP ~> 5.4
+Neutrino is a PHP 5.4 micro framework that helps you quickly write simple yet powerful web applications and APIs. Neutrino is easy to use for both beginners and professionals.
 
 ## Release infomation
 Neutrino framework release 1.0-dev3
